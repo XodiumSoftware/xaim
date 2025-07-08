@@ -26,7 +26,7 @@ data_collator = DataCollatorForLanguageModeling(
 )
 
 training_args = TrainingArguments(
-    output_dir="./finetuned_starcoder",
+    output_dir="./xaim",
     overwrite_output_dir=True,
     num_train_epochs=1,
     per_device_train_batch_size=1,

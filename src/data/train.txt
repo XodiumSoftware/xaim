@@ -1,0 +1,11 @@
+def add(a, b):
+    return a + b
+
+class Calculator:
+    def multiply(self, x, y):
+        return x * y
+
+# Utility function to read a file
+def read_file(path):
+    with open(path, "r") as f:
+        return f.read()
