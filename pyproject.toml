@@ -1,15 +1,9 @@
 [project]
-name = "illyrion"
-version = "0.1.1"
-description = " Discord Bot for Personal use"
+name = "xaim"
+version = "0.0.1"
+description = "Xodium Artificial Intelligence Model"
 requires-python = ">=3.13"
-dependencies = [
-    "py-cord",
-    "audioop-lts",
-    "psutil",
-    "python-dotenv>=1.1.1",
-    "black>=25.1.0",
-]
+dependencies = []
 
 authors = [{ name = "Xodium", email = "info@xodium.org" }]
 license = "AGPL-3.0"
