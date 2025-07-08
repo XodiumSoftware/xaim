@@ -8,4 +8,3 @@ dependencies = []
 authors = [{ name = "Xodium", email = "info@xodium.org" }]
 license = "AGPL-3.0"
 readme = "README.md"
-keywords = ["discord", "bot", "personal"]
