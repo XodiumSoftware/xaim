@@ -3,7 +3,11 @@ name = "xaim"
 version = "0.0.1"
 description = "Xodium Artificial Intelligence Model"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "transformers",
+    "torch",
+    "black>=25.1.0",
+]
 
 authors = [{ name = "Xodium", email = "info@xodium.org" }]
 license = "AGPL-3.0"

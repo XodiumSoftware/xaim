@@ -3,7 +3,7 @@
   <component name="Black">
     <option name="enabledOnReformat" value="true" />
     <option name="enabledOnSave" value="true" />
-    <option name="sdkName" value="uv (Illyrion)" />
+    <option name="sdkName" value="uv (xaim)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="uv (Illyrion)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="uv (xaim)" project-jdk-type="Python SDK" />
 </project>

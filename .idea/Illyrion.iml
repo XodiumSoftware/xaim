@@ -12,7 +12,7 @@
       <excludeFolder url="file://$MODULE_DIR$/src/logs" />
       <excludeFolder url="file://$MODULE_DIR$/src/data/logs" />
     </content>
-    <orderEntry type="jdk" jdkName="uv (Illyrion)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="uv (xaim)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">
