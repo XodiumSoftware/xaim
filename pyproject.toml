@@ -6,7 +6,9 @@ requires-python = ">=3.13"
 dependencies = [
     "transformers",
     "torch",
-    "black>=25.1.0",
+    "black",
+    "accelerate",
+    "datasets",
 ]
 
 authors = [{ name = "Xodium", email = "info@xodium.org" }]
