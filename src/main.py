@@ -71,14 +71,14 @@ def train(
             break
 
     output_dir = "output_model"    
-    model.save_pretrained(output_dir)
-    tokenizer.save_pretrained(output_dir)
+    model.save_pretrained(output_dir) # type: ignore
+    tokenizer.save_pretrained(output_dir) # type: ignore
 
 if __name__ == "__main__":
     model_name = "openai-community/gpt2"
-    tokenizer = cast(PreTrainedTokenizer, AutoTokenizer.from_pretrained(model_name))
-    tokenizer.pad_token = tokenizer.eos_token
-    model = cast(PreTrainedModel, AutoModelForCausalLM.from_pretrained(model_name))
+    tokenizer = cast(PreTrainedTokenizer, AutoTokenizer.from_pretrained(model_name)) # type: ignore
+    tokenizer.pad_token = tokenizer.eos_token # type: ignore
+    model = cast(PreTrainedModel, AutoModelForCausalLM.from_pretrained(model_name)) # type: ignore
 
     dataset = SpaCyTokenizedDataset("data/train.txt", tokenizer, block_size=32)
     train(model, dataset, tokenizer, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
