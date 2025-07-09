@@ -1,4 +1,5 @@
 from typing import cast
+from urllib.parse import urlparse
 import torch
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -14,13 +15,25 @@ class SentenceTokenizedDataset(Dataset[dict[str, torch.Tensor]]):
     Dataset that uses spaCy to segment text into sentences,
     then uses the transformers tokenizer to produce model inputs.
     """
-    def __init__(self, repo_path: str, tokenizer: PreTrainedTokenizer, block_size: int):
+    def __init__(self, url: str, tokenizer: PreTrainedTokenizer, block_size: int):
         self.tokenizer = tokenizer
         self.block_size = block_size
         self.nlp = spacy.load("en_core_web_sm", disable=["ner", "parser", "tagger"])
         self.nlp.add_pipe("sentencizer")
 
-        text: str = Utils.getRepo(repo_path)
+        parsed = urlparse(url)
+        path_parts = parsed.path.strip("/").split("/")
+
+        if parsed.netloc != "github.com" or not path_parts:
+                    raise ValueError("Only valid GitHub URLs are supported.")
+
+        if len(path_parts) == 1:
+            org = path_parts[0]
+            text = "\n".join(Utils.getRepo(repo_url) for repo_url in Utils.getRepos(org))
+        elif len(path_parts) == 2:
+            text = Utils.getRepo(url)
+        else:
+            raise ValueError("Invalid GitHub URL format.")
 
         self.sentences = [str(sent) for sent in self.nlp(text).sents]
         self.examples: list[dict[str, torch.Tensor]] = []
@@ -96,7 +109,7 @@ if __name__ == "__main__":
     tokenizer.pad_token = tokenizer.eos_token  # type: ignore
     model = cast(PreTrainedModel, AutoModelForCausalLM.from_pretrained(model_name))  # type: ignore
 
-    dataset = SentenceTokenizedDataset("https://github.com/XodiumSoftware/xbim", tokenizer, block_size=32) #TODO: set correct path.
+    dataset = SentenceTokenizedDataset("https://github.com/XodiumSoftware", tokenizer, block_size=32) #TODO: set correct path.
     trainer = Trainer(model, tokenizer, dataset, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     trainer.train()
     trainer.save("output_model")
