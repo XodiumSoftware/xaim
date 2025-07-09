@@ -9,7 +9,7 @@ import spacy
 from utils import Utils
 
 
-class SpaCyTokenizedDataset(Dataset[dict[str, torch.Tensor]]):
+class SentenceTokenizedDataset(Dataset[dict[str, torch.Tensor]]):
     """
     Dataset that uses spaCy to segment text into sentences,
     then uses the transformers tokenizer to produce model inputs.
@@ -46,39 +46,57 @@ class SpaCyTokenizedDataset(Dataset[dict[str, torch.Tensor]]):
         return self.examples[idx]
 
 
-def train(
-    model: PreTrainedModel,
-    dataset: Dataset[dict[str, torch.Tensor]],
-    tokenizer: PreTrainedTokenizer,
-    device: torch.device,
-) -> None:
-    dataloader = DataLoader(dataset, batch_size=1)
-    model.to(device) # type: ignore
-    model.train()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
+class Trainer:
+    """
+    Handles training of a causal language model using a tokenized dataset.
+    """
+    def __init__(
+        self,
+        model: PreTrainedModel,
+        tokenizer: PreTrainedTokenizer,
+        dataset: Dataset[dict[str, torch.Tensor]],
+        device: torch.device,
+        batch_size: int = 1,
+        lr: float = 5e-5,
+        max_steps: int = 100,
+    ):
+        self.model = model.to(device)  # type: ignore
+        self.tokenizer = tokenizer
+        self.dataset = dataset
+        self.device = device
+        self.batch_size = batch_size
+        self.lr = lr
+        self.max_steps = max_steps
 
-    for step, batch in enumerate(dataloader):
-        batch = {k: v.to(device) for k, v in batch.items()}
-        outputs = model(**batch)
-        loss = outputs.loss
-        loss.backward()
-        optimizer.step() # type: ignore
-        optimizer.zero_grad()
+        self.dataloader = DataLoader(dataset, batch_size=self.batch_size)
+        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr)  # type: ignore
 
-        if step % 10 == 0:
-            print(f"Step {step} | Loss: {loss.item():.4f}")
-        if step >= 100:
-            break
+    def train(self) -> None:
+        self.model.train()
+        for step, batch in enumerate(self.dataloader):
+            batch = {k: v.to(self.device) for k, v in batch.items()}
+            outputs = self.model(**batch)
+            loss = outputs.loss
+            loss.backward()
+            self.optimizer.step() # type: ignore
+            self.optimizer.zero_grad()
 
-    output_dir = "output_model"    
-    model.save_pretrained(output_dir) # type: ignore
-    tokenizer.save_pretrained(output_dir) # type: ignore
+            if step % 10 == 0:
+                print(f"Step {step} | Loss: {loss.item():.4f}")
+            if step >= self.max_steps:
+                break
+
+    def save(self, output_dir: str) -> None:
+        self.model.save_pretrained(output_dir)  # type: ignore
+        self.tokenizer.save_pretrained(output_dir)  # type: ignore
 
 if __name__ == "__main__":
     model_name = "openai-community/gpt2"
-    tokenizer = cast(PreTrainedTokenizer, AutoTokenizer.from_pretrained(model_name)) # type: ignore
-    tokenizer.pad_token = tokenizer.eos_token # type: ignore
-    model = cast(PreTrainedModel, AutoModelForCausalLM.from_pretrained(model_name)) # type: ignore
+    tokenizer = cast(PreTrainedTokenizer, AutoTokenizer.from_pretrained(model_name))  # type: ignore
+    tokenizer.pad_token = tokenizer.eos_token  # type: ignore
+    model = cast(PreTrainedModel, AutoModelForCausalLM.from_pretrained(model_name))  # type: ignore
 
-    dataset = SpaCyTokenizedDataset("data/train.txt", tokenizer, block_size=32)
-    train(model, dataset, tokenizer, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    dataset = SentenceTokenizedDataset("data/train.txt", tokenizer, block_size=32)
+    trainer = Trainer(model, tokenizer, dataset, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    trainer.train()
+    trainer.save("output_model")
