@@ -90,6 +90,15 @@ class Trainer:
         self.model.save_pretrained(output_dir)  # type: ignore
         self.tokenizer.save_pretrained(output_dir)  # type: ignore
 
+def test_model(model: PreTrainedModel, tokenizer: PreTrainedTokenizer, prompt: str, device: torch.device):
+    model.eval()
+    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+    with torch.no_grad():
+        outputs = model.generate(**inputs, max_length=50) # type: ignore
+    print("Prompt:", prompt)
+    print("Generated:", tokenizer.decode(outputs[0], skip_special_tokens=True)) # type: ignore
+
+
 if __name__ == "__main__":
     model_name = "openai-community/gpt2"
     tokenizer = cast(PreTrainedTokenizer, AutoTokenizer.from_pretrained(model_name))  # type: ignore
@@ -100,3 +109,8 @@ if __name__ == "__main__":
     trainer = Trainer(model, tokenizer, dataset, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     trainer.train()
     trainer.save("output_model")
+
+    # Load the trained model for testing
+    trained_model = AutoModelForCausalLM.from_pretrained("output_model").to(trainer.device) # type: ignore
+    trained_tokenizer = AutoTokenizer.from_pretrained("output_model") # type: ignore
+    test_model(trained_model, trained_tokenizer, prompt="The xbim project", device=trainer.device) # type: ignore
