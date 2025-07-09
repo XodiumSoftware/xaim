@@ -96,7 +96,7 @@ if __name__ == "__main__":
     tokenizer.pad_token = tokenizer.eos_token  # type: ignore
     model = cast(PreTrainedModel, AutoModelForCausalLM.from_pretrained(model_name))  # type: ignore
 
-    dataset = SentenceTokenizedDataset("", tokenizer, block_size=32) #TODO: set correct path.
+    dataset = SentenceTokenizedDataset("https://github.com/XodiumSoftware/xbim", tokenizer, block_size=32) #TODO: set correct path.
     trainer = Trainer(model, tokenizer, dataset, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     trainer.train()
     trainer.save("output_model")
