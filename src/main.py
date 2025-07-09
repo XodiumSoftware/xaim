@@ -68,9 +68,10 @@ def train(
             print(f"Step {step} | Loss: {loss.item():.4f}")
         if step >= 100:
             break
-        
-    model.save_pretrained("output_model")
-    tokenizer.save_pretrained("output_model")
+
+    output_dir = "output_model"    
+    model.save_pretrained(output_dir)
+    tokenizer.save_pretrained(output_dir)
 
 if __name__ == "__main__":
     model_name = "openai-community/gpt2"
