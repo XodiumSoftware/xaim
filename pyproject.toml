@@ -14,6 +14,3 @@ dependencies = [
 authors = [{ name = "Xodium", email = "info@xodium.org" }]
 license = "AGPL-3.0"
 readme = "README.md"
-
-[dependency-groups]
-dev = ["ty>=0.0.1a14"]
