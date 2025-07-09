@@ -16,6 +16,7 @@ class SpaCyTokenizedDataset(Dataset[dict[str, torch.Tensor]]):
         self.tokenizer = tokenizer
         self.block_size = block_size
         self.nlp = spacy.load("en_core_web_sm", disable=["ner", "parser", "tagger"])
+        self.nlp.add_pipe("sentencizer")
 
         with open(filepath, "r", encoding="utf-8") as f:
             text = f.read()
@@ -67,7 +68,9 @@ def train(
             print(f"Step {step} | Loss: {loss.item():.4f}")
         if step >= 100:
             break
-
+        
+    model.save_pretrained("output_model")
+    tokenizer.save_pretrained("output_model")
 
 if __name__ == "__main__":
     model_name = "openai-community/gpt2"

@@ -193,6 +193,5 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
-# Bot specific files
-logs
-src/.env
+# xaim specific files
+output_model/
