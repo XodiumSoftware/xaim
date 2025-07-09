@@ -1,6 +1,3 @@
-#   Copyright (c) 2025. Xodium.
-#   All rights reserved.
-
 import datasets
 from transformers import (
     AutoModelForCausalLM,
