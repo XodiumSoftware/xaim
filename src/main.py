@@ -20,7 +20,7 @@ class SpaCyTokenizedDataset(Dataset[dict[str, torch.Tensor]]):
         self.nlp = spacy.load("en_core_web_sm", disable=["ner", "parser", "tagger"])
         self.nlp.add_pipe("sentencizer")
 
-        text: str = Utils.getRepo(repo_path, (".py", ".md", ".txt"))
+        text: str = Utils.getRepo(repo_path)
 
         self.sentences = [str(sent) for sent in self.nlp(text).sents]
         self.examples: list[dict[str, torch.Tensor]] = []
