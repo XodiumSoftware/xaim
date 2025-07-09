@@ -6,20 +6,21 @@ from transformers.modeling_utils import PreTrainedModel
 from transformers.tokenization_utils import PreTrainedTokenizer
 import spacy
 
+from utils import Utils
+
 
 class SpaCyTokenizedDataset(Dataset[dict[str, torch.Tensor]]):
     """
     Dataset that uses spaCy to segment text into sentences,
     then uses the transformers tokenizer to produce model inputs.
     """
-    def __init__(self, filepath: str, tokenizer: PreTrainedTokenizer, block_size: int):
+    def __init__(self, repo_path: str, tokenizer: PreTrainedTokenizer, block_size: int):
         self.tokenizer = tokenizer
         self.block_size = block_size
         self.nlp = spacy.load("en_core_web_sm", disable=["ner", "parser", "tagger"])
         self.nlp.add_pipe("sentencizer")
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            text = f.read()
+        text: str = Utils.getRepo(repo_path, (".py", ".md", ".txt"))
 
         self.sentences = [str(sent) for sent in self.nlp(text).sents]
         self.examples: list[dict[str, torch.Tensor]] = []
