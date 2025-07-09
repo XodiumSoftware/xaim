@@ -1,3 +1,4 @@
+from typing import cast
 import torch
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -20,7 +21,7 @@ class SpaCyTokenizedDataset(Dataset[dict[str, torch.Tensor]]):
             text = f.read()
 
         self.sentences = [str(sent) for sent in self.nlp(text).sents]
-        self.examples = []
+        self.examples: list[dict[str, torch.Tensor]] = []
 
         for sent in self.sentences:
             tokens = tokenizer(
@@ -30,9 +31,10 @@ class SpaCyTokenizedDataset(Dataset[dict[str, torch.Tensor]]):
                 max_length=block_size,
                 padding="max_length",
             )
+            input_ids = cast(torch.Tensor, tokens["input_ids"])
             self.examples.append({
-                "input_ids": tokens["input_ids"].squeeze(0),
-                "labels": tokens["input_ids"].squeeze(0),
+                "input_ids": input_ids.squeeze(0),
+                "labels": input_ids.squeeze(0),
             })
 
     def __len__(self) -> int:
@@ -49,7 +51,7 @@ def train(
     device: torch.device,
 ) -> None:
     dataloader = DataLoader(dataset, batch_size=1)
-    model.to(device)
+    model.to(device) # type: ignore
     model.train()
     optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
 
@@ -58,7 +60,7 @@ def train(
         outputs = model(**batch)
         loss = outputs.loss
         loss.backward()
-        optimizer.step()
+        optimizer.step() # type: ignore
         optimizer.zero_grad()
 
         if step % 10 == 0:
@@ -69,9 +71,9 @@ def train(
 
 if __name__ == "__main__":
     model_name = "openai-community/gpt2"
-    tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer = cast(PreTrainedTokenizer, AutoTokenizer.from_pretrained(model_name))
     tokenizer.pad_token = tokenizer.eos_token
-    model: PreTrainedModel = AutoModelForCausalLM.from_pretrained(model_name)
+    model = cast(PreTrainedModel, AutoModelForCausalLM.from_pretrained(model_name))
 
     dataset = SpaCyTokenizedDataset("data/train.txt", tokenizer, block_size=32)
     train(model, dataset, tokenizer, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
